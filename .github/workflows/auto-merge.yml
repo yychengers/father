@@ -1,0 +1,31 @@
+name: Auto Merge master to test
+
+on:
+  push:
+    branches:
+      - master  # 监听 master 分支的 push 事件
+
+jobs:
+  merge-master-to-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 拉取完整历史记录，避免合并冲突
+
+      # 2. 配置 Git 用户信息（需与仓库权限匹配）
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      # 3. 切换到 test 分支，合并 master 分支
+      - name: Merge master into test
+        run: |
+          git checkout test
+          git pull origin test       # 确保 test 分支最新
+          git merge origin/master -m "Auto-merge master into test" --no-ff
+          git push origin test
